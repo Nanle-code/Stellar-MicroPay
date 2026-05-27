@@ -23,6 +23,7 @@ const tipsRoutes = require("./routes/tips");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
 const { startTurretsServer } = require("./turretsServer");
+const logger = require("./utils/logger");
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -100,6 +101,14 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
 app.get("/api/docs.json", (req, res) => {
   res.setHeader("Content-Type", "application/json");
   res.send(swaggerSpec);
+});
+
+// ─── 404 Handler ───────────────────────────────────────────────────────────────
+
+app.use((req, res, next) => {
+  const sanitizedPath = req.path.replace(/[\r\n]/g, "");
+  logger.warn({ method: req.method, path: sanitizedPath }, "Route not found");
+  res.status(404).json({ error: "Route not found" });
 });
 
 // ─── Error Handling ────────────────────────────────────────────────────────────
